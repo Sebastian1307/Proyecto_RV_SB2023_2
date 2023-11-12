@@ -1,6 +1,5 @@
 import * as THREE from "three";
 
-import { BoxLineGeometry } from "three/addons/geometries/BoxLineGeometry.js";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 
@@ -18,18 +17,7 @@ animate();
 
 function init() {
   scene = new THREE.Scene();
-  scene.background = new THREE.CubeTextureLoader()
-  .setPath('mats/')
-  .load([
-    'sh_lf.png',
-    'sh_rt.png',
-    'sh_up.png',
-    'sh_dn.png',
-    'sh_ft.png',
-    'sh_bk.png'
-  ]);
-//
-
+  scene.background = 
   camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
@@ -43,6 +31,7 @@ function init() {
 
   const light = new THREE.DirectionalLight(0xffffff, 3);
   light.position.set(1, 1, 1).normalize();
+  light.castShadow = true; // Habilitar sombras para la luz
   scene.add(light);
 
   marker = new THREE.Mesh(
@@ -55,20 +44,15 @@ function init() {
 const floorWidth = 10;
 const floorHeight = 10;
 
-// Crear el suelo con textura
-const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
-floorTexture.wrapS = THREE.RepeatWrapping;
-floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set(4, 4); // Repetir la textura para cubrir el suelo
+
 
 const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({
-        map: floorTexture,
-        transparent: false,
-        opacity: 0.25,
+    new THREE.MeshStandardMaterial({
+        color: 0xFF0000
     })
 );
+floor.receiveShadow = true; // Permitir que el suelo reciba sombras
 scene.add(floor);
 
 // Altura de las paredes
@@ -77,32 +61,30 @@ const wallHeight = 10;
 // Crear las paredes con textura
 const walls = new THREE.Group();
 
-const wallTexture = new THREE.TextureLoader().load('assets/gallerywalls2.jpg');
-wallTexture.wrapS = THREE.RepeatWrapping;
-wallTexture.wrapT = THREE.RepeatWrapping;
-wallTexture.repeat.set(2, 2); // Repetir la textura para cubrir las paredes
 
-const wallGeometry = new THREE.BoxGeometry(1, wallHeight, 1);
-const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, transparent: false, opacity: 0.75 });
-
+const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
 // Pared izquierda
 const leftWall = new THREE.Mesh(new THREE.BoxGeometry(1, wallHeight, floorHeight), wallMaterial);
 leftWall.position.set(-floorWidth / 2, wallHeight / 2, 0);
+leftWall.castShadow = true; // Permitir que la pared emita sombras
 walls.add(leftWall);
 
 // Pared derecha
 const rightWall = new THREE.Mesh(new THREE.BoxGeometry(1, wallHeight, floorHeight), wallMaterial);
 rightWall.position.set(floorWidth / 2, wallHeight / 2, 0);
+rightWall.castShadow = true;
 walls.add(rightWall);
 
 // Pared frontal
 const frontWall = new THREE.Mesh(new THREE.BoxGeometry(floorWidth, wallHeight, 1), wallMaterial);
 frontWall.position.set(0, wallHeight / 2, -floorHeight / 2);
+frontWall.castShadow = true;
 walls.add(frontWall);
 
 // Pared trasera
 const backWall = new THREE.Mesh(new THREE.BoxGeometry(floorWidth, wallHeight, 1), wallMaterial);
 backWall.position.set(0, wallHeight / 2, floorHeight / 2);
+backWall.castShadow = true;
 walls.add(backWall);
 
 scene.add(walls);
@@ -119,6 +101,9 @@ scene.add(walls);
     () => (baseReferenceSpace = renderer.xr.getReferenceSpace())
   );
   renderer.xr.enabled = true;
+
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   document.body.appendChild(renderer.domElement);
   document.body.appendChild(VRButton.createButton(renderer));
