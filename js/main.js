@@ -17,8 +17,7 @@ animate();
 
 function init() {
   scene = new THREE.Scene();
-  scene.background = 
-  camera = new THREE.PerspectiveCamera(
+  scene.background = camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -26,7 +25,6 @@ function init() {
   );
   camera.position.set(0, 1, 3);
 
- 
   scene.add(new THREE.HemisphereLight(0xffffff, 0xfffff, 3));
 
   const light = new THREE.DirectionalLight(0xffffff, 3);
@@ -40,55 +38,65 @@ function init() {
   );
   scene.add(marker);
 
-// Dimensiones del suelo
-const floorWidth = 10;
-const floorHeight = 10;
+  // Dimensiones del suelo
+  const floorWidth = 10;
+  const floorHeight = 10;
 
-
-
-const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(-Math.PI / 2),
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(
+      -Math.PI / 2
+    ),
     new THREE.MeshStandardMaterial({
-        color: 0xFF0000
+      color: 0xff0000,
     })
-);
-floor.receiveShadow = true; // Permitir que el suelo reciba sombras
-scene.add(floor);
+  );
+  floor.receiveShadow = true; // Permitir que el suelo reciba sombras
+  scene.add(floor);
 
-// Altura de las paredes
-const wallHeight = 10;
+  // Altura de las paredes
+  const wallHeight = 10;
 
-// Crear las paredes con textura
-const walls = new THREE.Group();
+  // Crear las paredes con textura
+  const walls = new THREE.Group();
 
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+  // Pared izquierda
+  const leftWall = new THREE.Mesh(
+    new THREE.BoxGeometry(1, wallHeight, floorHeight),
+    wallMaterial
+  );
+  leftWall.position.set(-floorWidth / 2, wallHeight / 2, 0);
+  leftWall.castShadow = true; // Permitir que la pared emita sombras
+  walls.add(leftWall);
 
-const wallMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
-// Pared izquierda
-const leftWall = new THREE.Mesh(new THREE.BoxGeometry(1, wallHeight, floorHeight), wallMaterial);
-leftWall.position.set(-floorWidth / 2, wallHeight / 2, 0);
-leftWall.castShadow = true; // Permitir que la pared emita sombras
-walls.add(leftWall);
+  // Pared derecha
+  const rightWall = new THREE.Mesh(
+    new THREE.BoxGeometry(1, wallHeight, floorHeight),
+    wallMaterial
+  );
+  rightWall.position.set(floorWidth / 2, wallHeight / 2, 0);
+  rightWall.castShadow = true;
+  walls.add(rightWall);
 
-// Pared derecha
-const rightWall = new THREE.Mesh(new THREE.BoxGeometry(1, wallHeight, floorHeight), wallMaterial);
-rightWall.position.set(floorWidth / 2, wallHeight / 2, 0);
-rightWall.castShadow = true;
-walls.add(rightWall);
+  // Pared frontal
+  const frontWall = new THREE.Mesh(
+    new THREE.BoxGeometry(floorWidth, wallHeight, 1),
+    wallMaterial
+  );
+  frontWall.position.set(0, wallHeight / 2, -floorHeight / 2);
+  frontWall.castShadow = true;
+  walls.add(frontWall);
 
-// Pared frontal
-const frontWall = new THREE.Mesh(new THREE.BoxGeometry(floorWidth, wallHeight, 1), wallMaterial);
-frontWall.position.set(0, wallHeight / 2, -floorHeight / 2);
-frontWall.castShadow = true;
-walls.add(frontWall);
+  // Pared trasera
+  const backWall = new THREE.Mesh(
+    new THREE.BoxGeometry(floorWidth, wallHeight, 1),
+    wallMaterial
+  );
+  backWall.position.set(0, wallHeight / 2, floorHeight / 2);
+  backWall.castShadow = true;
+  walls.add(backWall);
 
-// Pared trasera
-const backWall = new THREE.Mesh(new THREE.BoxGeometry(floorWidth, wallHeight, 1), wallMaterial);
-backWall.position.set(0, wallHeight / 2, floorHeight / 2);
-backWall.castShadow = true;
-walls.add(backWall);
-
-scene.add(walls);
-
+  scene.add(walls);
 
   raycaster = new THREE.Raycaster();
 
@@ -101,9 +109,6 @@ scene.add(walls);
     () => (baseReferenceSpace = renderer.xr.getReferenceSpace())
   );
   renderer.xr.enabled = true;
-
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   document.body.appendChild(renderer.domElement);
   document.body.appendChild(VRButton.createButton(renderer));
