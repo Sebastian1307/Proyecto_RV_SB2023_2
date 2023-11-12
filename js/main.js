@@ -8,8 +8,7 @@ let camera, scene, raycaster, renderer;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 
-let walls = []; // Array to store the four walls
-let marker, floor, baseReferenceSpace;
+let gallery, marker, floor, baseReferenceSpace;
 
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
@@ -20,16 +19,16 @@ animate();
 function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.CubeTextureLoader()
-    .setPath("mats/")
-    .load([
-      "sh_lf.png",
-      "sh_rt.png",
-      "sh_up.png",
-      "sh_dn.png",
-      "sh_ft.png",
-      "sh_bk.png",
-    ]);
-  //
+  .setPath('mats/')
+  .load([
+    'sh_lf.png',
+    'sh_rt.png',
+    'sh_up.png',
+    'sh_dn.png',
+    'sh_ft.png',
+    'sh_bk.png'
+  ]);
+//
 
   camera = new THREE.PerspectiveCamera(
     50,
@@ -38,36 +37,8 @@ function init() {
     10
   );
   camera.position.set(0, 1, 3);
+
  
-  const roomWidth = 5;
-  const roomHeight = 3;
-  
-  camera.position.set(0, roomHeight / 2, roomWidth);
-
-  // ...
-
-  // Crear la habitación
-  const roomGeometry = new THREE.BoxGeometry(roomWidth, roomHeight, roomWidth);
-  const roomMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: false });
-  const room = new THREE.Mesh(roomGeometry, roomMaterial);
-
-  // Posicionar la habitación en el centro
-  room.position.set(0, roomHeight / 2, 0);
-
-  scene.add(room);
-
-  // ...
-
-  // Crear el suelo como un objeto aparte
-  const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomWidth);
-  const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide });
-  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-  floor.rotation.x = Math.PI / 2; // Rotar el suelo para que esté horizontal
-
-  // Posicionar el suelo en el centro
-  floor.position.set(0, 0, 0);
-
-  scene.add(floor);
   scene.add(new THREE.HemisphereLight(0xa5a5a5, 0x898989, 3));
 
   const light = new THREE.DirectionalLight(0xffffff, 3);
@@ -80,7 +51,15 @@ function init() {
   );
   scene.add(marker);
 
-
+  floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(65, 65, 2, 2).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({
+      color: 0xbcbcbc,
+      transparent: true,
+      opacity: 0.25,
+    })
+  );
+  scene.add(floor);
 
   raycaster = new THREE.Raycaster();
 
