@@ -52,8 +52,8 @@ function init() {
   scene.add(marker);
 
 // Dimensiones del suelo
-const floorWidth = 65;
-const floorHeight = 65;
+const floorWidth = 40;
+const floorHeight = 40;
 
 // Crear el suelo con textura
 const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
