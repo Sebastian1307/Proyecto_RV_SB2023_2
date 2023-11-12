@@ -39,7 +39,7 @@ function init() {
   camera.position.set(0, 1, 3);
 
  
-  scene.add(new THREE.HemisphereLight(0xa5a5a5, 0x898989, 3));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xfffff, 3));
 
   const light = new THREE.DirectionalLight(0xffffff, 3);
   light.position.set(1, 1, 1).normalize();
@@ -51,15 +51,55 @@ function init() {
   );
   scene.add(marker);
 
+
+  const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
+floorTexture.wrapS = THREE.RepeatWrapping;
+floorTexture.wrapT = THREE.RepeatWrapping;
+floorTexture.repeat.set(4, 4); // Repetir la textura para cubrir el suelo
+
+
+  const floorWidth = 65;
+const floorHeight = 65;
   floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(65, 65, 2, 2).rotateX(-Math.PI / 2),
+    new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({
       color: 0xbcbcbc,
-      transparent: true,
-      opacity: 0.25,
+      map: floorTexture,
     })
   );
   scene.add(floor);
+
+  // Altura de las paredes
+const wallHeight = 10;
+
+// Crear las paredes
+const walls = new THREE.Group();
+
+const wallGeometry = new THREE.BoxGeometry(1, wallHeight, 1);
+const wallTexture = new THREE.TextureLoader().load('assets/gallerywalls.jpg');
+const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, map: wallTexture});
+
+// Pared izquierda
+const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+leftWall.position.set(-floorWidth / 2, wallHeight / 2, 0);
+walls.add(leftWall);
+
+// Pared derecha
+const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+rightWall.position.set(floorWidth / 2, wallHeight / 2, 0);
+walls.add(rightWall);
+
+// Pared frontal
+const frontWall = new THREE.Mesh(new THREE.BoxGeometry(floorWidth, wallHeight, 1), wallMaterial);
+frontWall.position.set(0, wallHeight / 2, -floorHeight / 2);
+walls.add(frontWall);
+
+// Pared trasera
+const backWall = new THREE.Mesh(new THREE.BoxGeometry(floorWidth, wallHeight, 1), wallMaterial);
+backWall.position.set(0, wallHeight / 2, floorHeight / 2);
+walls.add(backWall);
+
+scene.add(walls);
 
   raycaster = new THREE.Raycaster();
 
