@@ -22,29 +22,46 @@ function init() {
     100
   );
 
+  scene.background = new THREE.CubeTextureLoader()
+  .setPath('assets/')
+  .load([
+    'sh_lf.png',
+    'sh_rt.png',
+    'sh_up.png',
+    'sh_dn.png',
+    'sh_ft.png',
+    'sh_bk.png'
+  ]);
   
-  const floorLoader = new OBJLoader();
-  floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
-    floorObject.traverse(function (child) {
-      if (child instanceof THREE.Mesh) {
-        child.material = floorMaterial;
-      }
-    });
-    floor = floorObject;
-    scene.add(floor);
-  });
 
-  const wallsLoader = new OBJLoader();
-  wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
-    wallsObject.traverse(function (child) {
-      if (child instanceof THREE.Mesh) {
-
-        child.material = wallsMaterial;
-      }
-    });
-    walls = wallsObject;
-    scene.add(walls);
+  const textureLoader = new THREE.TextureLoader();
+  // Cargar textura para el suelo
+const floorLoader = new OBJLoader();
+floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
+  floorObject.traverse(function (child) {
+    if (child instanceof THREE.Mesh) {
+      // Asignar textura al suelo
+      const texture = textureLoader.load('assets/floor_texture.jpg');
+      child.material.map = texture;
+    }
   });
+  floor = floorObject;
+  scene.add(floor);
+});
+
+// Cargar textura para las paredes
+const wallsLoader = new OBJLoader();
+wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
+  wallsObject.traverse(function (child) {
+    if (child instanceof THREE.Mesh) {
+      // Asignar textura a las paredes
+      const texture = textureLoader.load('assets/walls_texture.jpg');
+      child.material.map = texture;
+    }
+  });
+  walls = wallsObject;
+  scene.add(walls);
+});
 
   // Marker
   marker = new THREE.Mesh(
