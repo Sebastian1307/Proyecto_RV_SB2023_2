@@ -51,41 +51,47 @@ function init() {
   );
   scene.add(marker);
 
+// Dimensiones del suelo
+const floorWidth = 65;
+const floorHeight = 65;
 
-  const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
+// Crear el suelo con textura
+const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(4, 4); // Repetir la textura para cubrir el suelo
 
-
-  const floorWidth = 65;
-const floorHeight = 65;
-  floor = new THREE.Mesh(
+const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({
-      color: 0xbcbcbc,
-      map: floorTexture,
+        map: floorTexture,
+        transparent: false,
+        opacity: 0.25,
     })
-  );
-  scene.add(floor);
+);
+scene.add(floor);
 
-  // Altura de las paredes
+// Altura de las paredes
 const wallHeight = 10;
 
-// Crear las paredes
+// Crear las paredes con textura
 const walls = new THREE.Group();
 
-const wallGeometry = new THREE.BoxGeometry(1, wallHeight, 1);
 const wallTexture = new THREE.TextureLoader().load('assets/gallerywalls.jpg');
-const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, map: wallTexture});
+wallTexture.wrapS = THREE.RepeatWrapping;
+wallTexture.wrapT = THREE.RepeatWrapping;
+wallTexture.repeat.set(2, 2); // Repetir la textura para cubrir las paredes
+
+const wallGeometry = new THREE.BoxGeometry(1, wallHeight, 1);
+const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, transparent: false, opacity: 0.75 });
 
 // Pared izquierda
-const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+const leftWall = new THREE.Mesh(new THREE.BoxGeometry(1, wallHeight, floorHeight), wallMaterial);
 leftWall.position.set(-floorWidth / 2, wallHeight / 2, 0);
 walls.add(leftWall);
 
 // Pared derecha
-const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+const rightWall = new THREE.Mesh(new THREE.BoxGeometry(1, wallHeight, floorHeight), wallMaterial);
 rightWall.position.set(floorWidth / 2, wallHeight / 2, 0);
 walls.add(rightWall);
 
@@ -100,6 +106,7 @@ backWall.position.set(0, wallHeight / 2, floorHeight / 2);
 walls.add(backWall);
 
 scene.add(walls);
+
 
   raycaster = new THREE.Raycaster();
 
