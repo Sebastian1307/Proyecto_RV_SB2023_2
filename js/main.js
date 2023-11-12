@@ -35,37 +35,22 @@ function init() {
   
 
   const textureLoader = new THREE.TextureLoader();
-  // Cargar textura para el suelo
-const floorLoader = new OBJLoader();
-floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
-  floorObject.traverse(function (child) {
-    if (child instanceof THREE.Mesh) {
-      // Asignar textura al suelo
-      const texture = textureLoader.load('assets/floor_texture.jpg');
-      child.material.map = texture;
-    }
-  });
-  floor = floorObject;
+
+  // Crear geometría y material para el suelo
+  const floorGeometry = new THREE.PlaneGeometry(10, 10); // ajusta el tamaño según sea necesario
+  const floorMaterial = new THREE.MeshBasicMaterial({ map: textureLoader.load('assets/floor_texture.jpg') });
+  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   scene.add(floor);
-  floor.position.y =-2
-
-});
-
-// Cargar textura para las paredes
-const wallsLoader = new OBJLoader();
-wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
-  wallsObject.traverse(function (child) {
-    if (child instanceof THREE.Mesh) {
-      // Asignar textura a las paredes
-      const texture = textureLoader.load('assets/walls_texture.jpg');
-      child.material.map = texture;
-    }
-  });
-  walls = wallsObject;
+  
+  // Crear geometría y material para las paredes
+  const wallsGeometry = new THREE.BoxGeometry(10, 5, 0.1); // ajusta el tamaño según sea necesario
+  const wallsMaterial = new THREE.MeshBasicMaterial({ map: textureLoader.load('assets/walls_texture.jpg') });
+  const walls = new THREE.Mesh(wallsGeometry, wallsMaterial);
   scene.add(walls);
-  walls.position.y =-2
 
-});
+  
+  // Puedes ajustar las posiciones y tamaños de las geometrías según tus necesidades.
+  
 
 
   // Marker
