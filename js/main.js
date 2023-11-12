@@ -52,8 +52,8 @@ function init() {
   scene.add(marker);
 
 // Dimensiones del suelo
-const floorWidth = 40;
-const floorHeight = 40;
+const floorWidth = 10;
+const floorHeight = 10;
 
 // Crear el suelo con textura
 const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
@@ -77,7 +77,7 @@ const wallHeight = 10;
 // Crear las paredes con textura
 const walls = new THREE.Group();
 
-const wallTexture = new THREE.TextureLoader().load('assets/gallerywalls.jpg');
+const wallTexture = new THREE.TextureLoader().load('assets/gallerywalls2.jpg');
 wallTexture.wrapS = THREE.RepeatWrapping;
 wallTexture.wrapT = THREE.RepeatWrapping;
 wallTexture.repeat.set(2, 2); // Repetir la textura para cubrir las paredes
