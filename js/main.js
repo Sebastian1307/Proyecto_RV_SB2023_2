@@ -39,24 +39,35 @@ function init() {
   );
   camera.position.set(0, 1, 3);
  
-  const wallMaterial = new THREE.MeshStandardMaterial({
-    map: new THREE.TextureLoader().load('assets/gallerywalls.jpg'),
-    metalness: 0.1,
-    roughness: 0.8,
-    side: THREE.DoubleSide, // Make the plane double-sided
-  });
+  const roomWidth = 5;
+  const roomHeight = 3;
+  
+  camera.position.set(0, roomHeight / 2, roomWidth);
 
-  for (let i = 0; i < 4; i++) {
-    const wall = new THREE.Mesh(
-      new THREE.PlaneGeometry(10, 10),
-      wallMaterial.clone() // Use a clone to avoid sharing the same material instance
-    );
+  // ...
 
-    wall.rotation.y = (Math.PI / 2) * i; // Rotate the wall to surround the floor
-    walls.push(wall);
-    scene.add(wall);
-  }
+  // Crear la habitación
+  const roomGeometry = new THREE.BoxGeometry(roomWidth, roomHeight, roomWidth);
+  const roomMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: false });
+  const room = new THREE.Mesh(roomGeometry, roomMaterial);
 
+  // Posicionar la habitación en el centro
+  room.position.set(0, roomHeight / 2, 0);
+
+  scene.add(room);
+
+  // ...
+
+  // Crear el suelo como un objeto aparte
+  const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomWidth);
+  const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide });
+  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+  floor.rotation.x = Math.PI / 2; // Rotar el suelo para que esté horizontal
+
+  // Posicionar el suelo en el centro
+  floor.position.set(0, 0, 0);
+
+  scene.add(floor);
   scene.add(new THREE.HemisphereLight(0xa5a5a5, 0x898989, 3));
 
   const light = new THREE.DirectionalLight(0xffffff, 3);
@@ -69,19 +80,8 @@ function init() {
   );
   scene.add(marker);
 
-  // Larger floor without a ceiling
-  floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10, 10, 10).rotateX(-Math.PI / 2),
-    new THREE.MeshStandardMaterial({
-      map: new THREE.TextureLoader().load('assets/galleryfloor.jpg'),
-      transparent: true,
-      opacity: 0.25,
-      side: THREE.DoubleSide, // Make the plane double-sided
-    })
-  );
-  scene.add(floor);
 
-  
+
   raycaster = new THREE.Raycaster();
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
