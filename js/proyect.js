@@ -28,33 +28,36 @@ function init() {
   );
   camera.position.set(0, 1, 3);
 
-  room = new THREE.LineSegments(
-    new BoxLineGeometry(6, 6, 6, 10, 10, 10).translate(0, 3, 0),
-    new THREE.LineBasicMaterial({ color: 0xbcbcbc })
-  );
-  scene.add(room);
+ 
+  const floorLoader = new OBJLoader();
+  floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
+    floorObject.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        child.material = floorMaterial;
+      }
+    });
+    floor = floorObject;
+    scene.add(floor);
+  });
 
-  scene.add(new THREE.HemisphereLight(0xa5a5a5, 0x898989, 3));
+  const wallsLoader = new OBJLoader();
+  wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
+    wallsObject.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
 
-  const light = new THREE.DirectionalLight(0xffffff, 3);
-  light.position.set(1, 1, 1).normalize();
-  scene.add(light);
+        child.material = wallsMaterial;
+      }
+    });
+    walls = wallsObject;
+    scene.add(walls);
+  });
 
+  // Marker
   marker = new THREE.Mesh(
     new THREE.CircleGeometry(0.25, 32).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({ color: 0xbcbcbc })
   );
   scene.add(marker);
-
-  floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.8, 4.8, 2, 2).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({
-      color: 0xbcbcbc,
-      transparent: true,
-      opacity: 0.25,
-    })
-  );
-  scene.add(floor);
 
   raycaster = new THREE.Raycaster();
 
