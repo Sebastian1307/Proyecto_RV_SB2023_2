@@ -22,25 +22,9 @@ function init() {
     100
   );
 
-  const cubeTexture = new THREE.CubeTextureLoader()
-    .setPath("assets/")
-    .load([
-      "sh_lf.png",
-      "sh_rt.png",
-      "sh_up.png",
-      "sh_dn.png",
-      "sh_ft.png",
-      "sh_bk.png",
-    ]);
-
-  scene.background = cubeTexture;
-
+  
   const floorLoader = new OBJLoader();
   floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
-    const floorTexture = new THREE.TextureLoader().load('assets/galleryfloor.jpg');
-    const floorMaterial = new THREE.MeshStandardMaterial({
-      map: floorTexture,
-    });
     floorObject.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = floorMaterial;
@@ -54,10 +38,7 @@ function init() {
   wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
     wallsObject.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
-        const wallsTexture = new THREE.TextureLoader().load('assets/gallerywalls.jpg');
-        const wallsMaterial = new THREE.MeshStandardMaterial({
-          map: wallsTexture,
-        });
+
         child.material = wallsMaterial;
       }
     });
