@@ -7,7 +7,7 @@ let camera, scene, raycaster, renderer;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 
-let gallery, marker, floor, baseReferenceSpace;
+let marker, floor, baseReferenceSpace;
 
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
@@ -42,7 +42,7 @@ function init() {
   const floorWidth = 10;
   const floorHeight = 10;
 
-  const floor = new THREE.Mesh(
+  floor = new THREE.Mesh(
     new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(
       -Math.PI / 2
     ),
