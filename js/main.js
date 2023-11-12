@@ -8,7 +8,8 @@ let camera, scene, raycaster, renderer;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 
-let gallery, marker, floor, baseReferenceSpace;
+let walls = []; // Array to store the four walls
+let marker, floor, baseReferenceSpace;
 
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
@@ -18,20 +19,17 @@ animate();
 
 function init() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x505050);
-
-  // 1. Add Skybox
-  const skyboxPath = "assets/"; // Set the path to your cubemap images
-  const skyboxUrls = [
-    `${skyboxPath}sh_ft.jpg`, // front
-    `${skyboxPath}sh_bk.jpg`, // back
-    `${skyboxPath}sh_up.jpg`, // up
-    `${skyboxPath}sh_dn.jpg`, // down
-    `${skyboxPath}sh_rt.jpg`, // right
-    `${skyboxPath}sh_lf.jpg`, // left
-  ];
-  const textureCube = new THREE.CubeTextureLoader().load(skyboxUrls);
-  scene.background = textureCube;
+  scene.background = new THREE.CubeTextureLoader()
+    .setPath("mats/")
+    .load([
+      "sh_lf.png",
+      "sh_rt.png",
+      "sh_up.png",
+      "sh_dn.png",
+      "sh_ft.png",
+      "sh_bk.png",
+    ]);
+  //
 
   camera = new THREE.PerspectiveCamera(
     50,
@@ -40,18 +38,24 @@ function init() {
     10
   );
   camera.position.set(0, 1, 3);
+ 
+  const wallMaterial = new THREE.MeshStandardMaterial({
+    map: new THREE.TextureLoader().load('assets/gallerywalls.jpg'),
+    metalness: 0.1,
+    roughness: 0.8,
+    side: THREE.DoubleSide, // Make the plane double-sided
+  });
 
-  // 2. Replace Room with Gallery
-  gallery = new THREE.Mesh(
-    // Replace this geometry with your gallery model
-    new THREE.BoxGeometry(6, 6, 6),
-    new THREE.MeshStandardMaterial({
-      color: 0xaaaaaa,
-      metalness: 0.1,
-      roughness: 0.8,
-    })
-  );
-  scene.add(gallery);
+  for (let i = 0; i < 4; i++) {
+    const wall = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 10),
+      wallMaterial.clone() // Use a clone to avoid sharing the same material instance
+    );
+
+    wall.rotation.y = (Math.PI / 2) * i; // Rotate the wall to surround the floor
+    walls.push(wall);
+    scene.add(wall);
+  }
 
   scene.add(new THREE.HemisphereLight(0xa5a5a5, 0x898989, 3));
 
@@ -65,16 +69,19 @@ function init() {
   );
   scene.add(marker);
 
+  // Larger floor without a ceiling
   floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.8, 4.8, 2, 2).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({
-      color: 0xbcbcbc,
+    new THREE.PlaneGeometry(10, 10, 10, 10).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({
+      map: new THREE.TextureLoader().load('assets/galleryfloor.jpg'),
       transparent: true,
       opacity: 0.25,
+      side: THREE.DoubleSide, // Make the plane double-sided
     })
   );
   scene.add(floor);
 
+  
   raycaster = new THREE.Raycaster();
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
