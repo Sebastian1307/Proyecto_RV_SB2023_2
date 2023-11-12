@@ -47,6 +47,8 @@ floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
   });
   floor = floorObject;
   scene.add(floor);
+  floor.position.y =0
+
 });
 
 // Cargar textura para las paredes
@@ -61,7 +63,10 @@ wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
   });
   walls = wallsObject;
   scene.add(walls);
+  walls.position.y =0
+
 });
+
 
   // Marker
   marker = new THREE.Mesh(
