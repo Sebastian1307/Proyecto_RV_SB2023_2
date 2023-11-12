@@ -47,7 +47,7 @@ floorLoader.load('assets/galeria_floor.obj', function (floorObject) {
   });
   floor = floorObject;
   scene.add(floor);
-  floor.position.y =0
+  floor.position.y =-2
 
 });
 
@@ -63,7 +63,7 @@ wallsLoader.load('assets/galeria_walls.obj', function (wallsObject) {
   });
   walls = wallsObject;
   scene.add(walls);
-  walls.position.y =0
+  walls.position.y =-2
 
 });
 
