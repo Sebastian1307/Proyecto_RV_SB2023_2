@@ -1,9 +1,14 @@
 import * as THREE from "three";
-import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+
+import { BoxLineGeometry } from "three/addons/geometries/BoxLineGeometry.js";
 import { VRButton } from "three/addons/webxr/VRButton.js";
+import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 
 let camera, scene, raycaster, renderer;
-let floor, walls, marker;
+let controller1, controller2;
+let controllerGrip1, controllerGrip2;
+
+let gallery, marker, floor, baseReferenceSpace;
 
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
@@ -15,50 +20,60 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x505050);
 
+  // 1. Add Skybox
+  const skyboxPath = "assets/"; // Set the path to your cubemap images
+  const skyboxUrls = [
+    `${skyboxPath}sh_ft.jpg`, // front
+    `${skyboxPath}sh_bk.jpg`, // back
+    `${skyboxPath}sh_up.jpg`, // up
+    `${skyboxPath}sh_dn.jpg`, // down
+    `${skyboxPath}sh_rt.jpg`, // right
+    `${skyboxPath}sh_lf.jpg`, // left
+  ];
+  const textureCube = new THREE.CubeTextureLoader().load(skyboxUrls);
+  scene.background = textureCube;
+
   camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
     0.1,
-    100
+    10
   );
+  camera.position.set(0, 1, 3);
 
-  scene.background = new THREE.CubeTextureLoader()
-  .setPath('assets/')
-  .load([
-    'sh_lf.png',
-    'sh_rt.png',
-    'sh_up.png',
-    'sh_dn.png',
-    'sh_ft.png',
-    'sh_bk.png'
-  ]);
-  
+  // 2. Replace Room with Gallery
+  gallery = new THREE.Mesh(
+    // Replace this geometry with your gallery model
+    new THREE.BoxGeometry(6, 6, 6),
+    new THREE.MeshStandardMaterial({
+      color: 0xaaaaaa,
+      metalness: 0.1,
+      roughness: 0.8,
+    })
+  );
+  scene.add(gallery);
 
-  const textureLoader = new THREE.TextureLoader();
+  scene.add(new THREE.HemisphereLight(0xa5a5a5, 0x898989, 3));
 
-  // Crear geometría y material para el suelo
-  const floorGeometry = new THREE.PlaneGeometry(10, 10); // ajusta el tamaño según sea necesario
-  const floorMaterial = new THREE.MeshBasicMaterial({ map: textureLoader.load('assets/floor_texture.jpg') });
-  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-  scene.add(floor);
-  
-  // Crear geometría y material para las paredes
-  const wallsGeometry = new THREE.BoxGeometry(10, 5, 0.1); // ajusta el tamaño según sea necesario
-  const wallsMaterial = new THREE.MeshBasicMaterial({ map: textureLoader.load('assets/walls_texture.jpg') });
-  const walls = new THREE.Mesh(wallsGeometry, wallsMaterial);
-  scene.add(walls);
+  const light = new THREE.DirectionalLight(0xffffff, 3);
+  light.position.set(1, 1, 1).normalize();
+  scene.add(light);
 
-  
-  // Puedes ajustar las posiciones y tamaños de las geometrías según tus necesidades.
-  
-
-
-  // Marker
   marker = new THREE.Mesh(
     new THREE.CircleGeometry(0.25, 32).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({ color: 0xbcbcbc })
   );
   scene.add(marker);
+
+  floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.8, 4.8, 2, 2).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({
+      color: 0xbcbcbc,
+      transparent: true,
+      opacity: 0.25,
+    })
+  );
+  scene.add(floor);
 
   raycaster = new THREE.Raycaster();
 
@@ -75,10 +90,107 @@ function init() {
   document.body.appendChild(renderer.domElement);
   document.body.appendChild(VRButton.createButton(renderer));
 
-  window.addEventListener("resize", onWindowResize, false);
+  // controllers
 
-  // Agregar evento de clic en la ventana para simular interacción
-  window.addEventListener("click", onWindowClick, false);
+  function onSelectStart() {
+    this.userData.isSelecting = true;
+  }
+
+  function onSelectEnd() {
+    this.userData.isSelecting = false;
+
+    if (INTERSECTION) {
+      const offsetPosition = {
+        x: -INTERSECTION.x,
+        y: -INTERSECTION.y,
+        z: -INTERSECTION.z,
+        w: 1,
+      };
+      const offsetRotation = new THREE.Quaternion();
+      const transform = new XRRigidTransform(offsetPosition, offsetRotation);
+      const teleportSpaceOffset =
+        baseReferenceSpace.getOffsetReferenceSpace(transform);
+
+      renderer.xr.setReferenceSpace(teleportSpaceOffset);
+    }
+  }
+
+  controller1 = renderer.xr.getController(0);
+  controller1.addEventListener("selectstart", onSelectStart);
+  controller1.addEventListener("selectend", onSelectEnd);
+  controller1.addEventListener("connected", function (event) {
+    this.add(buildController(event.data));
+  });
+  controller1.addEventListener("disconnected", function () {
+    this.remove(this.children[0]);
+  });
+  scene.add(controller1);
+
+  controller2 = renderer.xr.getController(1);
+  controller2.addEventListener("selectstart", onSelectStart);
+  controller2.addEventListener("selectend", onSelectEnd);
+  controller2.addEventListener("connected", function (event) {
+    this.add(buildController(event.data));
+  });
+  controller2.addEventListener("disconnected", function () {
+    this.remove(this.children[0]);
+  });
+  scene.add(controller2);
+
+  // The XRControllerModelFactory will automatically fetch controller models
+  // that match what the user is holding as closely as possible. The models
+  // should be attached to the object returned from getControllerGrip in
+  // order to match the orientation of the held device.
+
+  const controllerModelFactory = new XRControllerModelFactory();
+
+  controllerGrip1 = renderer.xr.getControllerGrip(0);
+  controllerGrip1.add(
+    controllerModelFactory.createControllerModel(controllerGrip1)
+  );
+  scene.add(controllerGrip1);
+
+  controllerGrip2 = renderer.xr.getControllerGrip(1);
+  controllerGrip2.add(
+    controllerModelFactory.createControllerModel(controllerGrip2)
+  );
+  scene.add(controllerGrip2);
+
+  //
+
+  window.addEventListener("resize", onWindowResize, false);
+}
+
+function buildController(data) {
+  let geometry, material;
+
+  switch (data.targetRayMode) {
+    case "tracked-pointer":
+      geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, -1], 3)
+      );
+      geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute([0.5, 0.5, 0.5, 0, 0, 0], 3)
+      );
+
+      material = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+      });
+
+      return new THREE.Line(geometry, material);
+
+    case "gaze":
+      geometry = new THREE.RingGeometry(0.02, 0.04, 32).translate(0, 0, -1);
+      material = new THREE.MeshBasicMaterial({
+        opacity: 0.5,
+        transparent: true,
+      });
+      return new THREE.Mesh(geometry, material);
+  }
 }
 
 function onWindowResize() {
@@ -88,49 +200,41 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function onWindowClick(event) {
-  // Obtener posición del clic en la ventana
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  // Actualizar raycaster y obtener intersección con el suelo
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects([floor]);
-
-  // Mover al usuario si hay una intersección válida
-  if (intersects.length > 0) {
-    INTERSECTION = intersects[0].point;
-
-    // Puedes ajustar la velocidad de movimiento según tus necesidades
-    const moveSpeed = 0.1;
-    const player = renderer.xr.getSession().renderState.baseLayer;
-    player.session.updateRenderState({ baseLayer: player });
-    player.session.updateRenderState({ inlineVerticalFieldOfView: 45 });
-    player.session.updateRenderState({ fixedFoveation: { stage: 3, viewportScale: 1 } });
-
-    const offsetPosition = {
-      x: -INTERSECTION.x * moveSpeed,
-      y: -INTERSECTION.y * moveSpeed,
-      z: -INTERSECTION.z * moveSpeed,
-      w: 1,
-    };
-    const offsetRotation = new THREE.Quaternion();
-    const transform = new XRRigidTransform(offsetPosition, offsetRotation);
-    const teleportSpaceOffset =
-      baseReferenceSpace.getOffsetReferenceSpace(transform);
-
-    renderer.xr.setReferenceSpace(teleportSpaceOffset);
-  }
-}
+//
 
 function animate() {
   renderer.setAnimationLoop(render);
 }
 
 function render() {
-  // Actualizar la posición del marker
-  marker.position.copy(camera.position);
+  INTERSECTION = undefined;
+
+  if (controller1.userData.isSelecting === true) {
+    tempMatrix.identity().extractRotation(controller1.matrixWorld);
+
+    raycaster.ray.origin.setFromMatrixPosition(controller1.matrixWorld);
+    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+    const intersects = raycaster.intersectObjects([floor]);
+
+    if (intersects.length > 0) {
+      INTERSECTION = intersects[0].point;
+    }
+  } else if (controller2.userData.isSelecting === true) {
+    tempMatrix.identity().extractRotation(controller2.matrixWorld);
+
+    raycaster.ray.origin.setFromMatrixPosition(controller2.matrixWorld);
+    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+    const intersects = raycaster.intersectObjects([floor]);
+
+    if (intersects.length > 0) {
+      INTERSECTION = intersects[0].point;
+    }
+  }
+
+  if (INTERSECTION) marker.position.copy(INTERSECTION);
+
   marker.visible = INTERSECTION !== undefined;
 
   renderer.render(scene, camera);
