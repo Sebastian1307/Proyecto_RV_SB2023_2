@@ -148,12 +148,49 @@ function init() {
     leftTexture.wrapT = THREE.RepeatWrapping; // Repetición en la dirección vertical (y)
 
     // Establece el número de repeticiones en x e y
-    leftTexture.repeat.set(1, 1); // Ajusta el valor según sea necesario
+    leftTexture.repeat.set(3, 3); // Ajusta el valor según sea necesario
     leftPainting.traverse((child) => {
       if (child.isMesh) {
         child.material.map = leftTexture;
       }
     });
+    // Pared derecha
+const rightPainting = frame.clone();
+rightPainting.position.set(floorWidth / 2 - 1, wallHeight / 2 + 2, 0);
+rightPainting.rotation.y = -Math.PI / 2; // Ajusta la rotación según sea necesario
+scene.add(rightPainting);
+
+const rightTexture = new THREE.TextureLoader().load("assets/pintura_derecha.jpeg");
+rightPainting.traverse((child) => {
+  if (child.isMesh) {
+    child.material.map = rightTexture;
+  }
+});
+
+// Pared frontal
+const frontPainting = frame.clone();
+frontPainting.position.set(0, wallHeight / 2 + 2, -floorHeight / 2 + 1);
+frontPainting.rotation.y = Math.PI; // Ajusta la rotación según sea necesario
+scene.add(frontPainting);
+
+const frontTexture = new THREE.TextureLoader().load("assets/pintura_frontal.jpeg");
+frontPainting.traverse((child) => {
+  if (child.isMesh) {
+    child.material.map = frontTexture;
+  }
+});
+
+// Pared trasera
+const backPainting = frame.clone();
+backPainting.position.set(0, wallHeight / 2 + 2, floorHeight / 2 - 1);
+scene.add(backPainting);
+
+const backTexture = new THREE.TextureLoader().load("assets/pintura_trasera.jpeg");
+backPainting.traverse((child) => {
+  if (child.isMesh) {
+    child.material.map = backTexture;
+  }
+});
   });
 
   raycaster = new THREE.Raycaster();
