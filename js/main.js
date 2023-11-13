@@ -27,6 +27,18 @@ function init() {
   camera.frustumCulled = false; // desactiva el culling del frustum
 
   camera.position.set(0, 1, 3);
+
+  scene.background = new THREE.CubeTextureLoader()
+    .setPath("assets/")
+    .load([
+      "sh_lf.png",
+      "sh_rt.png",
+      "sh_up.png",
+      "sh_dn.png",
+      "sh_ft.png",
+      "sh_bk.png",
+    ]);
+  //
   const luz2 = new THREE.HemisphereLight(0xffffff, 0xfffff, 1);
   scene.add(luz2);
   luz2.castShadow = true;
@@ -38,7 +50,7 @@ function init() {
 
   marker = new THREE.Mesh(
     new THREE.CircleGeometry(0.25, 32).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: 0xbcbcbc })
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
   );
   scene.add(marker);
 
@@ -47,6 +59,12 @@ function init() {
   const floorHeight = 50;
 
   const floortext = new THREE.TextureLoader().load("assets/galleryfloor.jpg");
+  // Configura la repetición de la textura
+  floortext.wrapS = THREE.RepeatWrapping; // Repetición en la dirección horizontal (x)
+  floortext.wrapT = THREE.RepeatWrapping; // Repetición en la dirección vertical (y)
+
+  // Establece el número de repeticiones en x e y
+  floortext.repeat.set(10, 10); // Ajusta el valor según sea necesario
   floor = new THREE.Mesh(
     new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(
       -Math.PI / 2
