@@ -131,7 +131,9 @@ function init() {
   // Cargar modelo OBJ para el cuadro y el marco
   objLoader.load("assets/cuadro.obj", (object) => {
     frame = object;
-    frame.scale.set(0.1, 0.1, 0.1);
+    frame.scale.set(0.8, 0.8, 0.8);
+    frame.position.z += -1
+    frame.position.y += 2
     frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
 
     // Poner un cuadro en la pared izquierda
@@ -147,7 +149,7 @@ function init() {
       }
     });
   });
-  
+
   raycaster = new THREE.Raycaster();
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
