@@ -24,8 +24,9 @@ function init() {
     10
   );
   camera.position.set(0, 1, 3);
-
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xfffff, 3));
+  const luz2 = new THREE.HemisphereLight(0xffffff, 0xfffff, 1);
+  scene.add(luz2);
+  luz2.castShadow = true;
 
   const light = new THREE.DirectionalLight(0xffffff, 3);
   light.position.set(1, 1, 1).normalize();
@@ -39,27 +40,32 @@ function init() {
   scene.add(marker);
 
   // Dimensiones del suelo
-  const floorWidth = 10;
-  const floorHeight = 10;
+  const floorWidth = 50;
+  const floorHeight = 50;
 
+  const floortext = new THREE.TextureLoader().load("assets/galleryfloor.jpg");
   floor = new THREE.Mesh(
     new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(
       -Math.PI / 2
     ),
     new THREE.MeshStandardMaterial({
-      color: 0xff0000,
+      map: floortext,
+      color: 0xffffff,
     })
   );
   floor.receiveShadow = true; // Permitir que el suelo reciba sombras
   scene.add(floor);
 
   // Altura de las paredes
-  const wallHeight = 10;
+  const wallHeight = 15;
 
   // Crear las paredes con textura
   const walls = new THREE.Group();
-
-  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+  const walltext = new THREE.TextureLoader().load("assets/gallerywalls.jpg");
+  const wallMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    map: walltext,
+  });
   // Pared izquierda
   const leftWall = new THREE.Mesh(
     new THREE.BoxGeometry(1, wallHeight, floorHeight),
