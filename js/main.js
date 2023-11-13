@@ -123,92 +123,30 @@ function init() {
   walls.add(backWall);
 
   scene.add(walls);
+ // Cargar modelo OBJ para el cuadro y el marco
+ const objLoader = new OBJLoader();
+ let frame, painting;
 
-  // Cargar modelo OBJ para el cuadro y el marco
-  const objLoader = new OBJLoader();
-  let frame;
+ // Cargar modelo OBJ para el cuadro y el marco
+ objLoader.load("assets/cuadro.obj", (object) => {
+   frame = object;
+   frame.scale.set(0.1, 0.1, 0.1);
+   frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
 
-  // Cargar modelo OBJ para el cuadro y el marco
-  objLoader.load("assets/cuadro.obj", (object) => {
-    frame = object;
-    frame.scale.set(0.6, 0.6, 0.1);
-    frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
+   // Poner un cuadro en la pared izquierda
+   const leftPainting = frame.clone();
+   leftPainting.position.set(-floorWidth / 2 + 1, wallHeight / 2 + 2, 0);
+   scene.add(leftPainting);
 
-    // Pared izquierda
-    const leftPainting = frame.clone();
-    leftPainting.position.set(
-      -floorWidth / 2 + 1,
-      wallHeight / 2 + 2,
-      -floorHeight / 4
-    ); // Ajusta la posición en Z
-    scene.add(leftPainting);
+   // Cargar imagen para el cuadro en la pared izquierda
+   const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg"); // Reemplaza con la ruta de tu imagen
+   leftPainting.traverse((child) => {
+     if (child.isMesh) {
+       child.material.map = leftTexture;
+     }
+   });
+ });
 
-    const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg"); // Reemplaza con la ruta de tu imagen
-    leftPainting.traverse((child) => {
-      if (child.isMesh) {
-        child.material.map = leftTexture;
-
-        // Ajusta las coordenadas de textura para evitar la deformación
-        const geometry = child.geometry;
-        if (geometry.attributes.uv) {
-          const uv = geometry.attributes.uv;
-          for (let i = 0; i < uv.array.length; i += 2) {
-            uv.array[i] *= 0.6; // Ajusta según sea necesario
-            uv.array[i + 1] *= 0.3; // Ajusta según sea necesario
-          }
-          uv.needsUpdate = true;
-        }
-      }
-    });
-
-    // Pared derecha
-    const rightPainting = frame.clone();
-    rightPainting.position.set(
-      floorWidth / 2 - 1,
-      wallHeight / 2 + 2,
-      -floorHeight / 4
-    ); // Ajusta la posición en Z
-    rightPainting.rotation.y = -Math.PI / 2; // Ajusta la rotación según sea necesario
-    scene.add(rightPainting);
-
-    const rightTexture = new THREE.TextureLoader().load(
-      "assets/pintura2.jpeg"
-    );
-    rightPainting.traverse((child) => {
-      if (child.isMesh) {
-        child.material.map = rightTexture;
-      }
-    });
-
-    // Pared frontal
-    const frontPainting = frame.clone();
-    frontPainting.position.set(0, wallHeight / 2 + 2, -floorHeight / 2 + 1);
-    frontPainting.rotation.y = Math.PI; // Ajusta la rotación según sea necesario
-    scene.add(frontPainting);
-
-    const frontTexture = new THREE.TextureLoader().load(
-      "assets/pintura3.jpeg"
-    );
-    frontPainting.traverse((child) => {
-      if (child.isMesh) {
-        child.material.map = frontTexture;
-      }
-    });
-
-    // Pared trasera
-    const backPainting = frame.clone();
-    backPainting.position.set(0, wallHeight / 2 + 2, floorHeight / 2 - 1);
-    scene.add(backPainting);
-
-    const backTexture = new THREE.TextureLoader().load(
-      "assets/pintura4.jpeg"
-    );
-    backPainting.traverse((child) => {
-      if (child.isMesh) {
-        child.material.map = backTexture;
-      }
-    });
-  });
 
   raycaster = new THREE.Raycaster();
 
@@ -323,6 +261,44 @@ function buildController(data) {
   }
 }
 
+let infoPanel; // variable para almacenar la interfaz de información
+
+function createInfoPanel(name, description) {
+  const panel = document.createElement("div");
+  panel.style.position = "absolute";
+  panel.style.top = "10%";
+  panel.style.left = "50%";
+  panel.style.transform = "translate(-50%, 0)";
+  panel.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+  panel.style.padding = "10px";
+  panel.style.borderRadius = "5px";
+  panel.style.pointerEvents = "auto";
+
+  const title = document.createElement("h3");
+  title.textContent = name;
+
+  const desc = document.createElement("p");
+  desc.textContent = description;
+
+  panel.appendChild(title);
+  panel.appendChild(desc);
+
+  return panel;
+}
+
+function showInfoPanel(name, description) {
+  infoPanel = createInfoPanel(name, description);
+  document.body.appendChild(infoPanel);
+}
+
+function hideInfoPanel() {
+  if (infoPanel) {
+    document.body.removeChild(infoPanel);
+    infoPanel = undefined;
+  }
+}
+
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -336,6 +312,7 @@ function animate() {
   renderer.setAnimationLoop(render);
 }
 
+
 function render() {
   INTERSECTION = undefined;
 
@@ -345,10 +322,13 @@ function render() {
     raycaster.ray.origin.setFromMatrixPosition(controller1.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersects = raycaster.intersectObjects([floor]);
+    const intersects = raycaster.intersectObjects([floor, leftPainting]); // Asegúrate de agregar el objeto del cuadro
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
+      showInfoPanel("Obra de arte", "Descripción de la obra de arte."); // Puedes personalizar esto con los detalles de la obra
+    } else {
+      hideInfoPanel();
     }
   } else if (controller2.userData.isSelecting === true) {
     tempMatrix.identity().extractRotation(controller2.matrixWorld);
@@ -356,10 +336,13 @@ function render() {
     raycaster.ray.origin.setFromMatrixPosition(controller2.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersects = raycaster.intersectObjects([floor]);
+    const intersects = raycaster.intersectObjects([floor, leftPainting]); // Asegúrate de agregar el objeto del cuadro
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
+      showInfoPanel("Obra de arte", "Descripción de la obra de arte."); // Puedes personalizar esto con los detalles de la obra
+    } else {
+      hideInfoPanel();
     }
   }
 
