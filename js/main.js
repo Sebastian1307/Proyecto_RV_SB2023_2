@@ -139,7 +139,7 @@ function init() {
    scene.add(leftPainting);
 
    // Cargar imagen para el cuadro en la pared izquierda
-   const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg"); // Reemplaza con la ruta de tu imagen
+   const leftTexture = new THREE.TextureLoader().load("assets/painting_left.jpg"); // Reemplaza con la ruta de tu imagen
    leftPainting.traverse((child) => {
      if (child.isMesh) {
        child.material.map = leftTexture;
@@ -261,42 +261,6 @@ function buildController(data) {
   }
 }
 
-let infoPanel; // variable para almacenar la interfaz de información
-
-function createInfoPanel(name, description) {
-  const panel = document.createElement("div");
-  panel.style.position = "absolute";
-  panel.style.top = "10%";
-  panel.style.left = "50%";
-  panel.style.transform = "translate(-50%, 0)";
-  panel.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
-  panel.style.padding = "10px";
-  panel.style.borderRadius = "5px";
-  panel.style.pointerEvents = "auto";
-
-  const title = document.createElement("h3");
-  title.textContent = name;
-
-  const desc = document.createElement("p");
-  desc.textContent = description;
-
-  panel.appendChild(title);
-  panel.appendChild(desc);
-
-  return panel;
-}
-
-function showInfoPanel(name, description) {
-  infoPanel = createInfoPanel(name, description);
-  document.body.appendChild(infoPanel);
-}
-
-function hideInfoPanel() {
-  if (infoPanel) {
-    document.body.removeChild(infoPanel);
-    infoPanel = undefined;
-  }
-}
 
 
 function onWindowResize() {
@@ -312,7 +276,6 @@ function animate() {
   renderer.setAnimationLoop(render);
 }
 
-
 function render() {
   INTERSECTION = undefined;
 
@@ -322,13 +285,10 @@ function render() {
     raycaster.ray.origin.setFromMatrixPosition(controller1.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersects = raycaster.intersectObjects([floor, leftPainting]); // Asegúrate de agregar el objeto del cuadro
+    const intersects = raycaster.intersectObjects([floor]);
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
-      showInfoPanel("Obra de arte", "Descripción de la obra de arte."); // Puedes personalizar esto con los detalles de la obra
-    } else {
-      hideInfoPanel();
     }
   } else if (controller2.userData.isSelecting === true) {
     tempMatrix.identity().extractRotation(controller2.matrixWorld);
@@ -336,13 +296,10 @@ function render() {
     raycaster.ray.origin.setFromMatrixPosition(controller2.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersects = raycaster.intersectObjects([floor, leftPainting]); // Asegúrate de agregar el objeto del cuadro
+    const intersects = raycaster.intersectObjects([floor]);
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
-      showInfoPanel("Obra de arte", "Descripción de la obra de arte."); // Puedes personalizar esto con los detalles de la obra
-    } else {
-      hideInfoPanel();
     }
   }
 
