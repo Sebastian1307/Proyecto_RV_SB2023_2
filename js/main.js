@@ -129,48 +129,32 @@ function init() {
   let frame, painting;
 
   // Cargar modelo OBJ para el cuadro y el marco
-objLoader.load("assets/cuadro.obj", (object) => {
-  frame = object;
-  frame.scale.set(0.6, 0.6, 0.1);
-  frame.position.z += -1;
-  frame.position.y += 2;
-  frame.rotation.y = Math.PI / 2;
+  objLoader.load("assets/cuadro.obj", (object) => {
+    frame = object;
+    frame.scale.set(0.6, 0.6, 0.1);
+    frame.position.z += -1;
+    frame.position.y += 2;
+    frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
 
-  // Ajustar coordenadas de textura para evitar deformación
-  frame.traverse((child) => {
-    if (child.isMesh) {
-      const geometry = child.geometry;
+    // Poner un cuadro en la pared izquierda
+    const leftPainting = frame.clone();
+    leftPainting.position.set(-floorWidth / 2 + 1, wallHeight / 2 + 2, 0);
+    scene.add(leftPainting);
 
-      // Asegúrate de que la geometría tiene coordenadas de textura
-      if (geometry.attributes.uv) {
-        const uv = geometry.attributes.uv;
+    // Cargar imagen para el cuadro en la pared izquierda
+    const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg"); // Reemplaza con la ruta de tu imagen
+    // Configura la repetición de la textura
+    leftTexture.wrapS = THREE.RepeatWrapping; // Repetición en la dirección horizontal (x)
+    leftTexture.wrapT = THREE.RepeatWrapping; // Repetición en la dirección vertical (y)
 
-        // Escala las coordenadas de textura en función de la escala del cuadro
-        for (let i = 0; i < uv.array.length; i += 2) {
-          uv.array[i] *= 0.6; // Ajusta según sea necesario
-          uv.array[i + 1] *= 0.6;
-        }
-
-        // Informa a Three.js que las coordenadas de textura han cambiado
-        uv.needsUpdate = true;
+    // Establece el número de repeticiones en x e y
+    leftTexture.repeat.set(10, 10); // Ajusta el valor según sea necesario
+    leftPainting.traverse((child) => {
+      if (child.isMesh) {
+        child.material.map = leftTexture;
       }
-    }
+    });
   });
-
-  // Poner un cuadro en la pared izquierda
-  const leftPainting = frame.clone();
-  leftPainting.position.set(-floorWidth / 2 + 1, wallHeight / 2 + 2, 0);
-  scene.add(leftPainting);
-
-  // Cargar imagen para el cuadro en la pared izquierda
-  const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg");
-  leftPainting.traverse((child) => {
-    if (child.isMesh) {
-      child.material.map = leftTexture;
-    }
-  });
-});
-
 
   raycaster = new THREE.Raycaster();
 
