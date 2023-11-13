@@ -77,8 +77,16 @@ function init() {
   floor.receiveShadow = true; // Permitir que el suelo reciba sombras
   scene.add(floor);
 
+  // Crear función para cargar una imagen en un cuadro
+  function loadTexture(url) {
+    const texture = new THREE.TextureLoader().load(url);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const geometry = new THREE.BoxGeometry(1, 1, 0.05); // Tamaño del cuadro
+    const cube = new THREE.Mesh(geometry, material);
+    return cube;
+  }
   // Altura de las paredes
-  const wallHeight = 15;
+  const wallHeight = 10;
 
   // Crear las paredes con textura
   const walls = new THREE.Group();
@@ -87,13 +95,14 @@ function init() {
     color: 0xffffff,
     map: walltext,
   });
+
   // Pared izquierda
   const leftWall = new THREE.Mesh(
     new THREE.BoxGeometry(1, wallHeight, floorHeight),
     wallMaterial
   );
   leftWall.position.set(-floorWidth / 2, wallHeight / 2, 0);
-  leftWall.castShadow = true; // Permitir que la pared emita sombras
+  leftWall.castShadow = true;
   walls.add(leftWall);
 
   // Pared derecha
@@ -123,7 +132,44 @@ function init() {
   backWall.castShadow = true;
   walls.add(backWall);
 
+  // Agregar cuadros a la pared izquierda
+  const leftWallCubes = new THREE.Group();
+  for (let i = 0; i < 3; i++) {
+    const cube = loadTexture('assets/pintura.jpeg'); // Reemplaza 'ruta_de_tu_imagen.jpg' con la ruta de tus imágenes
+    cube.position.set(-floorWidth / 2 + 1, wallHeight / 2 + i * 2, 0); // Ajusta la posición según sea necesario
+    leftWallCubes.add(cube);
+  }
+  walls.add(leftWallCubes);
+
+  // Agregar cuadros a la pared derecha
+  const rightWallCubes = new THREE.Group();
+  for (let i = 0; i < 3; i++) {
+    const cube = loadTexture('assets/pintura.jpeg'); // Reemplaza 'ruta_de_tu_imagen.jpg' con la ruta de tus imágenes
+    cube.position.set(floorWidth / 2 - 1, wallHeight / 2 + i * 2, 0); // Ajusta la posición según sea necesario
+    rightWallCubes.add(cube);
+  }
+  walls.add(rightWallCubes);
+
+  // Agregar cuadros a la pared frontal
+  const frontWallCubes = new THREE.Group();
+  for (let i = 0; i < 3; i++) {
+    const cube = loadTexture('assets/pintura.jpeg'); // Reemplaza 'ruta_de_tu_imagen.jpg' con la ruta de tus imágenes
+    cube.position.set(0, wallHeight / 2 + i * 2, -floorHeight / 2 + 1); // Ajusta la posición según sea necesario
+    frontWallCubes.add(cube);
+  }
+  walls.add(frontWallCubes);
+
+  // Agregar cuadros a la pared trasera
+  const backWallCubes = new THREE.Group();
+  for (let i = 0; i < 3; i++) {
+    const cube = loadTexture('assets/pintura.jpeg'); // Reemplaza 'ruta_de_tu_imagen.jpg' con la ruta de tus imágenes
+    cube.position.set(0, wallHeight / 2 + i * 2, floorHeight / 2 - 1); // Ajusta la posición según sea necesario
+    backWallCubes.add(cube);
+  }
+  walls.add(backWallCubes);
+
   scene.add(walls);
+
 
   raycaster = new THREE.Raycaster();
 
@@ -186,8 +232,6 @@ function init() {
     this.remove(this.children[0]);
   });
   scene.add(controller2);
-
-
 
   const controllerModelFactory = new XRControllerModelFactory();
 
