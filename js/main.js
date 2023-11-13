@@ -21,8 +21,11 @@ function init() {
     50,
     window.innerWidth / window.innerHeight,
     0.1,
-    10
+    100
   );
+  camera.updateProjectionMatrix(); // asegúrate de actualizar la matriz de proyección
+  camera.frustumCulled = false; // desactiva el culling del frustum
+
   camera.position.set(0, 1, 3);
   const luz2 = new THREE.HemisphereLight(0xffffff, 0xfffff, 1);
   scene.add(luz2);
