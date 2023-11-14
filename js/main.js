@@ -4,17 +4,18 @@ import { VRButton } from "three/addons/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
+
 let camera, scene, raycaster, renderer;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
-
 let marker, floor, baseReferenceSpace;
-
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
 
+
 init();
 animate();
+
 
 function init() {
   scene = new THREE.Scene();
@@ -26,7 +27,6 @@ function init() {
   );
   camera.updateProjectionMatrix(); // asegúrate de actualizar la matriz de proyección
   camera.frustumCulled = false; // desactiva el culling del frustum
-
   camera.position.set(0, 1, 3);
 
   scene.background = new THREE.CubeTextureLoader()
@@ -123,55 +123,52 @@ function init() {
   walls.add(backWall);
 
   scene.add(walls);
- // Cargar modelo OBJ para el cuadro y el marco
- const objLoader = new OBJLoader();
- let frame, painting;
+  // Cargar modelo OBJ para el cuadro y el marco
+  const objLoader = new OBJLoader();
+  let frame, painting;
 
- // Cargar modelo OBJ para el cuadro y el marco
- objLoader.load("assets/cuadro.obj", (object) => {
-   frame = object;
-   frame.scale.set(0.1, 0.1, 0.1);
-   frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
+  // Cargar modelo OBJ para el cuadro y el marco
+  objLoader.load("assets/cuadro.obj", (object) => {
+    frame = object;
+    frame.scale.set(0.1, 0.1, 0.1);
+    frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
 
-   // Poner un cuadro en la pared izquierda
-   const leftPainting = frame.clone();
-   leftPainting.position.set(-floorWidth / 2 + 1, wallHeight / 2 + 2, 0);
-   scene.add(leftPainting);
+    // Poner un cuadro en la pared izquierda
+    const leftPainting = frame.clone();
+    leftPainting.position.set(-floorWidth / 2 + 1, wallHeight / 2 + 2, 0);
+    scene.add(leftPainting);
 
-   // Cargar imagen para el cuadro en la pared izquierda
-   const leftTexture = new THREE.TextureLoader().load("assets/painting_left.jpg"); // Reemplaza con la ruta de tu imagen
-   leftPainting.traverse((child) => {
-     if (child.isMesh) {
-       child.material.map = leftTexture;
-     }
-   });
- });
-
+    // Cargar imagen para el cuadro en la pared izquierda
+    const leftTexture = new THREE.TextureLoader().load(
+      "assets/painting_left.jpg"
+    ); // Reemplaza con la ruta de tu imagen
+    leftPainting.traverse((child) => {
+      if (child.isMesh) {
+        child.material.map = leftTexture;
+      }
+    });
+  });
 
   raycaster = new THREE.Raycaster();
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
-
   renderer.xr.addEventListener(
     "sessionstart",
     () => (baseReferenceSpace = renderer.xr.getReferenceSpace())
   );
   renderer.xr.enabled = true;
-
   document.body.appendChild(renderer.domElement);
   document.body.appendChild(VRButton.createButton(renderer));
 
-  // controllers
 
+  // controllers
   function onSelectStart() {
     this.userData.isSelecting = true;
   }
-
   function onSelectEnd() {
     this.userData.isSelecting = false;
-
     if (INTERSECTION) {
       const offsetPosition = {
         x: -INTERSECTION.x,
@@ -183,7 +180,6 @@ function init() {
       const transform = new XRRigidTransform(offsetPosition, offsetRotation);
       const teleportSpaceOffset =
         baseReferenceSpace.getOffsetReferenceSpace(transform);
-
       renderer.xr.setReferenceSpace(teleportSpaceOffset);
     }
   }
@@ -261,16 +257,12 @@ function buildController(data) {
   }
 }
 
-
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
-//
 
 function animate() {
   renderer.setAnimationLoop(render);
