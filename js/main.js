@@ -72,7 +72,7 @@ function init() {
     new THREE.MeshPhysicalMaterial({
       map: floortext,
       color: 0xffffff,
-      metalness: 0, // Ajusta según sea necesario
+      metalness: 0.5, // Ajusta según sea necesario
       roughness: 1, // Ajusta según sea necesario
       envMap: envmap, // Asigna el entorno de mapeo
       envMapIntensity: 0.2, // Ajusta según sea necesario
@@ -135,6 +135,7 @@ function init() {
     frame = object;
     frame.scale.set(0.6, 0.6, 0.1);
     frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
+    frame.position.y += 1
 
     // Poner un cuadro en la pared izquierda
     const leftPainting = frame.clone();
@@ -142,7 +143,7 @@ function init() {
     scene.add(leftPainting);
 
     // Cargar imagen para el cuadro en la pared izquierda
-    const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg"); // Reemplaza con la ruta de tu imagen
+    const leftTexture = new THREE.TextureLoader().load("assets/pintura2.jpeg"); // Reemplaza con la ruta de tu imagen
     leftPainting.traverse((child) => {
       if (child.isMesh) {
         child.material.map = leftTexture;
