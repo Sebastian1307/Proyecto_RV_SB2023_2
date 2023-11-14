@@ -4,7 +4,6 @@ import { VRButton } from "three/addons/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
-
 let camera, scene, raycaster, renderer;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
@@ -12,10 +11,8 @@ let marker, floor, baseReferenceSpace;
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
 
-
 init();
 animate();
-
 
 function init() {
   scene = new THREE.Scene();
@@ -29,7 +26,7 @@ function init() {
   camera.frustumCulled = false; // desactiva el culling del frustum
   camera.position.set(0, 1, 3);
 
-  scene.background = new THREE.CubeTextureLoader()
+  const envmap = new THREE.CubeTextureLoader()
     .setPath("assets/")
     .load([
       "sh_lf.png",
@@ -39,6 +36,8 @@ function init() {
       "sh_ft.png",
       "sh_bk.png",
     ]);
+
+  scene.background = envmap
   //
   const luz2 = new THREE.HemisphereLight(0xffffff, 0xfffff, 1);
   scene.add(luz2);
@@ -70,9 +69,13 @@ function init() {
     new THREE.PlaneGeometry(floorWidth, floorHeight, 2, 2).rotateX(
       -Math.PI / 2
     ),
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshPhysicalMaterial({
       map: floortext,
       color: 0xffffff,
+      metalness: 0, // Ajusta según sea necesario
+      roughness: 1, // Ajusta según sea necesario
+      envMap: envmap, // Asigna el entorno de mapeo
+      envMapIntensity: 0.2, // Ajusta según sea necesario
     })
   );
   floor.receiveShadow = true; // Permitir que el suelo reciba sombras
@@ -130,7 +133,7 @@ function init() {
   // Cargar modelo OBJ para el cuadro y el marco
   objLoader.load("assets/cuadro.obj", (object) => {
     frame = object;
-    frame.scale.set(0.1, 0.1, 0.1);
+    frame.scale.set(0.6, 0.6, 0.1);
     frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
 
     // Poner un cuadro en la pared izquierda
@@ -139,9 +142,7 @@ function init() {
     scene.add(leftPainting);
 
     // Cargar imagen para el cuadro en la pared izquierda
-    const leftTexture = new THREE.TextureLoader().load(
-      "assets/painting_left.jpg"
-    ); // Reemplaza con la ruta de tu imagen
+    const leftTexture = new THREE.TextureLoader().load("assets/pintura.jpeg"); // Reemplaza con la ruta de tu imagen
     leftPainting.traverse((child) => {
       if (child.isMesh) {
         child.material.map = leftTexture;
@@ -161,7 +162,6 @@ function init() {
   renderer.xr.enabled = true;
   document.body.appendChild(renderer.domElement);
   document.body.appendChild(VRButton.createButton(renderer));
-
 
   // controllers
   function onSelectStart() {
