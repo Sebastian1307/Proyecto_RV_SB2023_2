@@ -148,7 +148,7 @@ function init() {
     leftTexture.wrapS = THREE.RepeatWrapping; // Repetición en la dirección horizontal (x)
     leftTexture.wrapT = THREE.RepeatWrapping; // Repetición en la dirección vertical (y)
     // Establece el número de repeticiones en x e y
-    leftTexture.repeat.set(3, 3); // Ajusta el valor según sea necesario
+    leftTexture.repeat.set(2, 1); // Ajusta el valor según sea necesario
     leftPainting.traverse((child) => {
       if (child.isMesh) {
         child.material.map = leftTexture;
