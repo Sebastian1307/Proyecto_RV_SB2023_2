@@ -158,7 +158,6 @@ function init() {
       }
     });
   });
-
   // Crear instancias de los cargadores
   const objLoaderEx = new OBJLoader();
   const mtlLoaderEx = new MTLLoader();
@@ -172,9 +171,29 @@ function init() {
     materials.preload(); // Cargar los materiales
     objLoaderEx.setMaterials(materials); // Asignar los materiales al cargador OBJ
 
-    objLoaderEx.load(objPath, (caballero) => {
+    const models = []; // Array para almacenar los modelos cargados
+
+    // Cargar tres modelos para cada cilindro
+    for (let i = 0; i < 3; i++) {
+      objLoaderEx.load(objPath, (model) => {
+        models.push(model);
       
-    });
+        if (models.length === 3) {
+          // Todos los modelos cargados, posicionar sobre los cilindros
+          for (let j = 0; j < models.length; j++) {
+            const selectedExhibitor = exhibitors.children[j];
+            models[j].position.copy(selectedExhibitor.position);
+            models[j].position.y += cylinderHeight / 2;
+      
+            // Marcar para rotación
+            models[j].userData.rotate = true;
+      
+            scene.add(models[j]);
+          }
+        }
+      });
+      
+    }
   });
 
   // Crear cilindros como exhibidores
@@ -187,7 +206,7 @@ function init() {
     const angle = (i / numExhibitors) * Math.PI * 2;
 
     // Ajusta la distancia de los cilindros para que no se salgan de las paredes
-    const distanceToWall = floorWidth / 2 - cylinderRadius - 0.5; // 0.5 es el ancho del cilindro
+    const distanceToWall = floorWidth / 2 - cylinderRadius - 0.3; // 0.3 es la nueva separación
     const x = Math.cos(angle) * distanceToWall;
     const z = Math.sin(angle) * distanceToWall;
 
@@ -207,15 +226,6 @@ function init() {
   }
 
   scene.add(exhibitors);
-
-  // Cargar modelo del caballero
-  objLoaderEx.load(objPath, (caballero) => {
-    // Posicionar el modelo sobre uno de los cilindros
-    const selectedExhibitor = exhibitors.children[0]; // Puedes cambiar este índice según tus necesidades
-    caballero.position.copy(selectedExhibitor.position);
-    caballero.position.y += cylinderHeight / 2;
-    scene.add(caballero);
-  });
 
   raycaster = new THREE.Raycaster();
 
@@ -333,6 +343,12 @@ function onWindowResize() {
 
 function animate() {
   renderer.setAnimationLoop(render);
+  // Agrega la rotación a los modelos marcados con userData.rotate
+  scene.traverse((object) => {
+    if (object.isMesh && object.userData.rotate) {
+      object.rotation.y += 0.005; // Ajusta la velocidad de rotación según sea necesario
+    }
+  });
 }
 
 function render() {
