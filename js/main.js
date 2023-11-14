@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 
 let camera, scene, raycaster, renderer;
 let controller1, controller2;
@@ -158,6 +159,24 @@ function init() {
     });
   });
 
+ // Crear instancias de los cargadores
+const objLoaderEx = new OBJLoader();
+const mtlLoaderEx = new MTLLoader();
+
+// Rutas de los archivos OBJ y MTL
+const objPath = "assets/caballero.obj";
+const mtlPath = "assets/caballero.mtl";
+
+// Cargar el archivo MTL y luego el archivo OBJ
+mtlLoaderEx.load(mtlPath, (materials) => {
+  materials.preload(); // Cargar los materiales
+  objLoaderEx.setMaterials(materials); // Asignar los materiales al cargador OBJ
+
+  objLoaderEx.load(objPath, (caballero) => {
+    // Objeto cargado con sus materiales
+    scene.add(caballero);
+  });
+});
   raycaster = new THREE.Raycaster();
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
