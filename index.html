@@ -9,6 +9,7 @@
         margin: 0;
       }
     </style>
+    <link rel="stylesheet" href="estilo.css">
     <title>Galeria Virtual // Realidad Virtual</title>
 </head>
 
@@ -21,11 +22,13 @@
           } 
         } 
       </script>
-    <script type="module" src="js/main.js"></script>
-    <div id="hud" style="position: absolute; top: 10px; left: 10px; color: white; display: none;">
-      <h3 id="paintingTitle"></h3>
-      <p id="paintingDescription"></p>
+      <div id="toast" class="hidden">
+        <p id="artworkTitle">Título de la obra</p>
+        <p id="artworkDescription">Descripción de la obra</p>
     </div>
+    <script type="module" src="js/main.js"></script>
+    
+
     
 </body>
 

@@ -349,6 +349,27 @@ function buildController(data) {
   }
 }
 
+
+// Obtén la referencia al elemento "toast"
+const toastElement = document.getElementById("toast");
+
+// Función para mostrar la interfaz
+function showInterface(artworkTitle, artworkDescription) {
+  // Muestra el "toast"
+  toastElement.style.display = "block";
+
+  // Llena la información de la obra de arte en el "toast"
+  document.getElementById("artworkTitle").innerText = artworkTitle;
+  document.getElementById("artworkDescription").innerText = artworkDescription;
+}
+
+// Función para ocultar la interfaz
+function hideInterface() {
+  // Oculta el "toast"
+  toastElement.style.display = "none";
+}
+
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -379,6 +400,9 @@ function render() {
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
+
+      // Mostrar el "toast" con información de la obra de arte
+      showInterface("Nombre de la obra", "Descripción de la obra");
     }
   } else if (controller2.userData.isSelecting === true) {
     tempMatrix.identity().extractRotation(controller2.matrixWorld);
@@ -390,7 +414,13 @@ function render() {
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
+
+      // Mostrar el "toast" con información de la obra de arte
+      showInterface("Nombre de la obra", "Descripción de la obra");
     }
+  } else {
+    // Si no hay intersección, oculta el "toast"
+    hideInterface();
   }
 
   if (INTERSECTION) marker.position.copy(INTERSECTION);
