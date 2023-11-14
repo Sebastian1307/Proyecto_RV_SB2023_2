@@ -19,7 +19,6 @@ init();
 animate();
 
 function init() {
-  const gui = new dat.GUI();
 
   scene = new THREE.Scene();
   scene.background = camera = new THREE.PerspectiveCamera(
