@@ -72,10 +72,10 @@ function init() {
     new THREE.MeshPhysicalMaterial({
       map: floortext,
       color: 0xffffff,
-      metalness: 0.5, // Ajusta según sea necesario
-      roughness: 1, // Ajusta según sea necesario
+      metalness: 0.8, // Ajusta según sea necesario
+      roughness: 0.1, // Ajusta según sea necesario
       envMap: envmap, // Asigna el entorno de mapeo
-      envMapIntensity: 0.2, // Ajusta según sea necesario
+      envMapIntensity: 0.1, // Ajusta según sea necesario
     })
   );
   floor.receiveShadow = true; // Permitir que el suelo reciba sombras
@@ -145,8 +145,8 @@ function init() {
     // Cargar imagen para el cuadro en la pared izquierda
     const leftTexture = new THREE.TextureLoader().load("assets/pintura3.jpeg"); // Reemplaza con la ruta de tu imagen
     // Escala de la textura para que se ajuste al marco
-    const textureScaleX = 0.2; // Ajusta según sea necesario
-    const textureScaleY = 0.2; // Ajusta según sea necesario
+    const textureScaleX = 0.9; // Ajusta según sea necesario
+    const textureScaleY = 0.9; // Ajusta según sea necesario
 
     leftPainting.traverse((child) => {
       if (child.isMesh) {
