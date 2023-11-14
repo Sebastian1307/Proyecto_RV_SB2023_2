@@ -274,12 +274,14 @@ function init() {
       };
       const offsetRotation = new THREE.Quaternion();
       const transform = new XRRigidTransform(offsetPosition, offsetRotation);
-      const teleportSpaceOffset =
-        baseReferenceSpace.getOffsetReferenceSpace(transform);
+      const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace(transform);
       renderer.xr.setReferenceSpace(teleportSpaceOffset);
+  
+      // Restablece la escala de los modelos al teleportarse
+      resetModelScale(models);
     }
   }
-
+  
   controller1 = renderer.xr.getController(0);
   controller1.addEventListener("selectstart", onSelectStart);
   controller1.addEventListener("selectend", onSelectEnd);
