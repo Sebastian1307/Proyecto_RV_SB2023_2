@@ -158,74 +158,75 @@ function init() {
       }
     });
   });
-  // Crear instancias de los cargadores
-  const objLoaderEx = new OBJLoader();
-  const mtlLoaderEx = new MTLLoader();
-
-  // Rutas de los archivos OBJ y MTL
-  const objPath = "assets/caballero.obj";
-  const mtlPath = "assets/caballero.mtl";
-
-  // Cargar el archivo MTL y luego el archivo OBJ
-  mtlLoaderEx.load(mtlPath, (materials) => {
-    materials.preload(); // Cargar los materiales
-    objLoaderEx.setMaterials(materials); // Asignar los materiales al cargador OBJ
-
-    const models = []; // Array para almacenar los modelos cargados
-
-    // Cargar tres modelos para cada cilindro
-    for (let i = 0; i < 3; i++) {
-      objLoaderEx.load(objPath, (model) => {
-        models.push(model);
-      
-        if (models.length === 3) {
-          // Todos los modelos cargados, posicionar sobre los cilindros
-          for (let j = 0; j < models.length; j++) {
-            const selectedExhibitor = exhibitors.children[j];
-            models[j].position.copy(selectedExhibitor.position);
-            models[j].position.y += cylinderHeight / 2;
-      
-            // Marcar para rotación
-            models[j].userData.rotate = true;
-      
-            scene.add(models[j]);
-          }
-        }
-      });
-      
-    }
-  });
-
   // Crear cilindros como exhibidores
-  const numExhibitors = 3;
-  const exhibitors = new THREE.Group();
-  const cylinderRadius = 0.5;
-  const cylinderHeight = 1.5;
+const numExhibitors = 3;
+const exhibitors = new THREE.Group();
+const cylinderRadius = 0.5;
+const cylinderHeight = 1.5;
 
-  for (let i = 0; i < numExhibitors; i++) {
-    const angle = (i / numExhibitors) * Math.PI * 2;
+for (let i = 0; i < numExhibitors; i++) {
+  const angle = (i / numExhibitors) * Math.PI * 2;
 
-    // Ajusta la distancia de los cilindros para que no se salgan de las paredes
-    const distanceToWall = floorWidth / 2 - cylinderRadius - 0.3; // 0.3 es la nueva separación
-    const x = Math.cos(angle) * distanceToWall;
-    const z = Math.sin(angle) * distanceToWall;
+  // Ajusta la distancia de los cilindros para que no se salgan de las paredes
+  const distanceToWall = floorWidth / 2 - cylinderRadius - 0.3; // 0.3 es la nueva separación
+  const x = Math.cos(angle) * distanceToWall;
+  const z = Math.sin(angle) * distanceToWall;
 
-    const cylinder = new THREE.Mesh(
-      new THREE.CylinderGeometry(
-        cylinderRadius,
-        cylinderRadius,
-        cylinderHeight,
-        32
-      ),
-      new THREE.MeshStandardMaterial({ color: 0x00ff00 }) // Puedes cambiar el color según sea necesario
-    );
+  const cylinder = new THREE.Mesh(
+    new THREE.CylinderGeometry(
+      cylinderRadius,
+      cylinderRadius,
+      cylinderHeight,
+      32
+    ),
+    new THREE.MeshStandardMaterial({ color: 0x00ff00 }) // Puedes cambiar el color según sea necesario
+  );
 
-    cylinder.position.set(x, cylinderHeight / 2, z);
-    cylinder.castShadow = true;
-    exhibitors.add(cylinder);
-  }
+  cylinder.position.set(x, cylinderHeight / 2, z);
+  cylinder.castShadow = true;
+  exhibitors.add(cylinder);
+}
 
-  scene.add(exhibitors);
+scene.add(exhibitors);
+
+// Cargar instancias de los cargadores
+const objLoaderEx = new OBJLoader();
+const mtlLoaderEx = new MTLLoader();
+
+// Rutas de los archivos OBJ y MTL para cada modelo
+const objPaths = ["assets/caballero.obj", "assets/caballero2.obj", "assets/caballero3.obj"];
+const mtlPaths = ["assets/caballero.mtl", "assets/caballero2.mtl", "assets/caballero3.mtl"];
+
+const models = []; // Array para almacenar los modelos cargados
+
+// Cargar modelos para cada cilindro
+for (let i = 0; i < numExhibitors; i++) {
+  const objPath = objPaths[i];
+  const mtlPath = mtlPaths[i];
+
+  mtlLoaderEx.load(mtlPath, (materials) => {
+    materials.preload();
+    objLoaderEx.setMaterials(materials);
+
+    objLoaderEx.load(objPath, (model) => {
+      models.push(model);
+
+      if (models.length === numExhibitors) {
+        // Todos los modelos cargados, posicionar sobre los cilindros
+        for (let j = 0; j < models.length; j++) {
+          const selectedExhibitor = exhibitors.children[j];
+          models[j].position.copy(selectedExhibitor.position);
+          models[j].position.y += cylinderHeight / 2;
+
+          // Marcar para rotación
+          models[j].userData.rotate = true;
+
+          scene.add(models[j]);
+        }
+      }
+    });
+  });
+}
 
   raycaster = new THREE.Raycaster();
 
