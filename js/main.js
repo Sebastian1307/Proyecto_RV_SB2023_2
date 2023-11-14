@@ -19,6 +19,7 @@ init();
 animate();
 
 function init() {
+  const gui = new dat.GUI();
 
   scene = new THREE.Scene();
   scene.background = camera = new THREE.PerspectiveCamera(
@@ -274,14 +275,12 @@ function init() {
       };
       const offsetRotation = new THREE.Quaternion();
       const transform = new XRRigidTransform(offsetPosition, offsetRotation);
-      const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace(transform);
+      const teleportSpaceOffset =
+        baseReferenceSpace.getOffsetReferenceSpace(transform);
       renderer.xr.setReferenceSpace(teleportSpaceOffset);
-  
-      // Restablece la escala de los modelos al teleportarse
-      resetModelScale(models);
     }
   }
-  
+
   controller1 = renderer.xr.getController(0);
   controller1.addEventListener("selectstart", onSelectStart);
   controller1.addEventListener("selectend", onSelectEnd);
@@ -371,6 +370,7 @@ function animate() {
     }
   });
 }
+
 function render() {
   INTERSECTION = undefined;
 
@@ -384,12 +384,6 @@ function render() {
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
-
-      // Escala los modelos cuando estás cerca
-      scaleModelsOnIntersection(models, INTERSECTION);
-    } else {
-      // Restablece la escala de los modelos si no hay intersección
-      resetModelScale(models);
     }
   } else if (controller2.userData.isSelecting === true) {
     tempMatrix.identity().extractRotation(controller2.matrixWorld);
@@ -401,12 +395,6 @@ function render() {
 
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
-
-      // Escala los modelos cuando estás cerca
-      scaleModelsOnIntersection(models, INTERSECTION);
-    } else {
-      // Restablece la escala de los modelos si no hay intersección
-      resetModelScale(models);
     }
   }
 
@@ -415,27 +403,4 @@ function render() {
   marker.visible = INTERSECTION !== undefined;
 
   renderer.render(scene, camera);
-}
-
-function scaleModelsOnIntersection(models, intersection) {
-  // Escala los modelos cuando estás cerca
-  for (const model of models) {
-    const distance = model.position.distanceTo(intersection);
-
-    // Ajusta estos valores según sea necesario
-    const minDistance = 1;
-    const maxDistance = 3;
-
-    if (distance < maxDistance && distance > minDistance) {
-      const scale = THREE.MathUtils.mapLinear(distance, minDistance, maxDistance, 1, 2);
-      model.scale.set(scale, scale, scale);
-    }
-  }
-}
-
-function resetModelScale(models) {
-  // Restablece la escala de los modelos si no hay intersección
-  for (const model of models) {
-    model.scale.set(1, 1, 1);
-  }
 }
