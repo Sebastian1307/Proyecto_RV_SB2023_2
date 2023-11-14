@@ -1,9 +1,12 @@
 import * as THREE from "three";
 
+
+
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
+
 
 let camera, scene, raycaster, renderer;
 let controller1, controller2;
@@ -16,6 +19,7 @@ init();
 animate();
 
 function init() {
+
   scene = new THREE.Scene();
   scene.background = camera = new THREE.PerspectiveCamera(
     50,
@@ -349,27 +353,6 @@ function buildController(data) {
   }
 }
 
-
-// Obtén la referencia al elemento "toast"
-const toastElement = document.getElementById("toast");
-
-// Función para mostrar la interfaz
-function showInterface(artworkTitle, artworkDescription) {
-  // Muestra el "toast"
-  toastElement.style.display = "block";
-
-  // Llena la información de la obra de arte en el "toast"
-  document.getElementById("artworkTitle").innerText = artworkTitle;
-  document.getElementById("artworkDescription").innerText = artworkDescription;
-}
-
-// Función para ocultar la interfaz
-function hideInterface() {
-  // Oculta el "toast"
-  toastElement.style.display = "none";
-}
-
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -386,7 +369,6 @@ function animate() {
     }
   });
 }
-
 function render() {
   INTERSECTION = undefined;
 
@@ -401,8 +383,11 @@ function render() {
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
 
-      // Mostrar el "toast" con información de la obra de arte
-      showInterface("Nombre de la obra", "Descripción de la obra");
+      // Escala los modelos cuando estás cerca
+      scaleModelsOnIntersection(models, INTERSECTION);
+    } else {
+      // Restablece la escala de los modelos si no hay intersección
+      resetModelScale(models);
     }
   } else if (controller2.userData.isSelecting === true) {
     tempMatrix.identity().extractRotation(controller2.matrixWorld);
@@ -415,12 +400,12 @@ function render() {
     if (intersects.length > 0) {
       INTERSECTION = intersects[0].point;
 
-      // Mostrar el "toast" con información de la obra de arte
-      showInterface("Nombre de la obra", "Descripción de la obra");
+      // Escala los modelos cuando estás cerca
+      scaleModelsOnIntersection(models, INTERSECTION);
+    } else {
+      // Restablece la escala de los modelos si no hay intersección
+      resetModelScale(models);
     }
-  } else {
-    // Si no hay intersección, oculta el "toast"
-    hideInterface();
   }
 
   if (INTERSECTION) marker.position.copy(INTERSECTION);
@@ -428,4 +413,27 @@ function render() {
   marker.visible = INTERSECTION !== undefined;
 
   renderer.render(scene, camera);
+}
+
+function scaleModelsOnIntersection(models, intersection) {
+  // Escala los modelos cuando estás cerca
+  for (const model of models) {
+    const distance = model.position.distanceTo(intersection);
+
+    // Ajusta estos valores según sea necesario
+    const minDistance = 1;
+    const maxDistance = 3;
+
+    if (distance < maxDistance && distance > minDistance) {
+      const scale = THREE.MathUtils.mapLinear(distance, minDistance, maxDistance, 1, 2);
+      model.scale.set(scale, scale, scale);
+    }
+  }
+}
+
+function resetModelScale(models) {
+  // Restablece la escala de los modelos si no hay intersección
+  for (const model of models) {
+    model.scale.set(1, 1, 1);
+  }
 }
