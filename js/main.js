@@ -143,15 +143,17 @@ function init() {
     scene.add(leftPainting);
 
     // Cargar imagen para el cuadro en la pared izquierda
-    const leftTexture = new THREE.TextureLoader().load("assets/pintura2.jpeg"); // Reemplaza con la ruta de tu imagen
-    // Configura la repetición de la textura
-    leftTexture.wrapS = THREE.RepeatWrapping; // Repetición en la dirección horizontal (x)
-    leftTexture.wrapT = THREE.RepeatWrapping; // Repetición en la dirección vertical (y)
-    // Establece el número de repeticiones en x e y
-    leftTexture.repeat.set(5, 1); // Ajusta el valor según sea necesario
+    const leftTexture = new THREE.TextureLoader().load("assets/pintura3.jpeg"); // Reemplaza con la ruta de tu imagen
+    // Escala de la textura para que se ajuste al marco
+    const textureScaleX = 0.2; // Ajusta según sea necesario
+    const textureScaleY = 0.2; // Ajusta según sea necesario
+
     leftPainting.traverse((child) => {
       if (child.isMesh) {
         child.material.map = leftTexture;
+        child.material.map.repeat.set(textureScaleX, textureScaleY);
+        child.material.map.wrapS = THREE.RepeatWrapping;
+        child.material.map.wrapT = THREE.RepeatWrapping;
       }
     });
   });
