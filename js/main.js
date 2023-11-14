@@ -135,7 +135,7 @@ function init() {
     frame = object;
     frame.scale.set(0.6, 0.6, 0.1);
     frame.rotation.y = Math.PI / 2; // Ajusta la rotación según sea necesario
-    frame.position.y += 1;
+    frame.position.y += -2;
 
     // Poner un cuadro en la pared izquierda
     const leftPainting = frame.clone();
@@ -148,7 +148,7 @@ function init() {
     leftTexture.wrapS = THREE.RepeatWrapping; // Repetición en la dirección horizontal (x)
     leftTexture.wrapT = THREE.RepeatWrapping; // Repetición en la dirección vertical (y)
     // Establece el número de repeticiones en x e y
-    leftTexture.repeat.set(2, 1); // Ajusta el valor según sea necesario
+    leftTexture.repeat.set(5, 2); // Ajusta el valor según sea necesario
     leftPainting.traverse((child) => {
       if (child.isMesh) {
         child.material.map = leftTexture;
