@@ -159,24 +159,64 @@ function init() {
     });
   });
 
- // Crear instancias de los cargadores
-const objLoaderEx = new OBJLoader();
-const mtlLoaderEx = new MTLLoader();
+  // Crear instancias de los cargadores
+  const objLoaderEx = new OBJLoader();
+  const mtlLoaderEx = new MTLLoader();
 
-// Rutas de los archivos OBJ y MTL
-const objPath = "assets/caballero.obj";
-const mtlPath = "assets/caballero.mtl";
+  // Rutas de los archivos OBJ y MTL
+  const objPath = "assets/caballero.obj";
+  const mtlPath = "assets/caballero.mtl";
 
-// Cargar el archivo MTL y luego el archivo OBJ
-mtlLoaderEx.load(mtlPath, (materials) => {
-  materials.preload(); // Cargar los materiales
-  objLoaderEx.setMaterials(materials); // Asignar los materiales al cargador OBJ
+  // Cargar el archivo MTL y luego el archivo OBJ
+  mtlLoaderEx.load(mtlPath, (materials) => {
+    materials.preload(); // Cargar los materiales
+    objLoaderEx.setMaterials(materials); // Asignar los materiales al cargador OBJ
 
+    objLoaderEx.load(objPath, (caballero) => {
+      
+    });
+  });
+
+  // Crear cilindros como exhibidores
+  const numExhibitors = 3;
+  const exhibitors = new THREE.Group();
+  const cylinderRadius = 0.5;
+  const cylinderHeight = 1.5;
+
+  for (let i = 0; i < numExhibitors; i++) {
+    const angle = (i / numExhibitors) * Math.PI * 2;
+
+    // Ajusta la distancia de los cilindros para que no se salgan de las paredes
+    const distanceToWall = floorWidth / 2 - cylinderRadius - 0.5; // 0.5 es el ancho del cilindro
+    const x = Math.cos(angle) * distanceToWall;
+    const z = Math.sin(angle) * distanceToWall;
+
+    const cylinder = new THREE.Mesh(
+      new THREE.CylinderGeometry(
+        cylinderRadius,
+        cylinderRadius,
+        cylinderHeight,
+        32
+      ),
+      new THREE.MeshStandardMaterial({ color: 0x00ff00 }) // Puedes cambiar el color según sea necesario
+    );
+
+    cylinder.position.set(x, cylinderHeight / 2, z);
+    cylinder.castShadow = true;
+    exhibitors.add(cylinder);
+  }
+
+  scene.add(exhibitors);
+
+  // Cargar modelo del caballero
   objLoaderEx.load(objPath, (caballero) => {
-    // Objeto cargado con sus materiales
+    // Posicionar el modelo sobre uno de los cilindros
+    const selectedExhibitor = exhibitors.children[0]; // Puedes cambiar este índice según tus necesidades
+    caballero.position.copy(selectedExhibitor.position);
+    caballero.position.y += cylinderHeight / 2;
     scene.add(caballero);
   });
-});
+
   raycaster = new THREE.Raycaster();
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
